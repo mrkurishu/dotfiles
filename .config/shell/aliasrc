@@ -8,11 +8,12 @@
 
 [ -f "$MBSYNCRC" ] && alias mbsync="mbsync -c $MBSYNCRC"
 
-# sudo not required for some system commands
+# Always run with sudo privilegies
 for command in mount umount sv pacman updatedb su shutdown poweroff reboot ; do
 	alias $command="sudo $command"
 done; unset command
 
+# Edit form ~/.local/bin using fzf and preferred editor
 se() {
 	choice="$(find ~/.local/bin -mindepth 1 -printf '%P\n' | fzf)"
 	[ -f "$HOME/.local/bin/$choice" ] && $EDITOR "$HOME/.local/bin/$choice"
@@ -75,5 +76,6 @@ alias torstop="~/.local/bin/torstop.sh"
 alias torstatus="~/.local/bin/torstatus.sh"
 alias scriptsdir="cd ~/.local/bin"
 alias scriptshidden="cd ~/.local/share/"
-alias monero="monero-wallet-cli --proxy 127.0.0.1:9050 --daemon-address=127.0.0.1:18089"alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+alias monero="monero-wallet-cli --proxy 127.0.0.1:9050 --daemon-address=127.0.0.1:18089"
+alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias reloadqtile="qtile cmd-obj -o cmd -f reload_config"
