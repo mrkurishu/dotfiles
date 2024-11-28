@@ -1,0 +1,79 @@
+#!/bin/sh
+
+# Use neovim for vim if present.
+[ -x "$(command -v nvim)" ] && alias vim="nvim" vimdiff="nvim -d"
+
+# Use $XINITRC variable if file exists.
+[ -f "$XINITRC" ] && alias startx="startx $XINITRC"
+
+[ -f "$MBSYNCRC" ] && alias mbsync="mbsync -c $MBSYNCRC"
+
+# sudo not required for some system commands
+for command in mount umount sv pacman updatedb su shutdown poweroff reboot ; do
+	alias $command="sudo $command"
+done; unset command
+
+se() {
+	choice="$(find ~/.local/bin -mindepth 1 -printf '%P\n' | fzf)"
+	[ -f "$HOME/.local/bin/$choice" ] && $EDITOR "$HOME/.local/bin/$choice"
+	}
+
+# Verbosity and settings that you pretty much just always are going to want.
+alias \
+	cp="cp -iv" \
+	mv="mv -iv" \
+	rm="trash -v" \
+	bc="bc -ql" \
+	rsync="rsync -vrPlu" \
+	mkdir="mkdir -pv" \
+	yt="yt-dlp --embed-metadata -i" \
+	yta="yt -x -f bestaudio/best" \
+	ytt="yt --skip-download --write-thumbnail" \
+	ffmpeg="ffmpeg -hide_banner" \
+	home="cd ~" \
+	rmd="/bin/rm --recursive --force --verbose" \
+	la="ls -Alh" \
+	ll="ls -Fls"  \
+	topcpu="/bin/ps -eo pcpu,pid,user,args | sort -k 1 -r | head -10" \
+	emacs="emacsclient -c -a 'emacs'" \
+	wwoz="mpv --osd-level=3 http://wwoz-sc.streamguys1.com/wwoz-hi.mp3 &" \
+	killwwoz='pkill -f "mpv --osd-level=3 http://wwoz-sc.streamguys1.com/wwoz-hi.mp3"' \
+	cal="cal -m" \
+        movies="cd /media/media1/sabnzbd/config/Downloads/complete"
+
+# Colorize commands when possible.
+alias \
+	ls="ls -hN --color=auto --group-directories-first" \
+	grep="grep --color=auto" \
+	diff="diff --color=auto" \
+	ccat="highlight --out-format=ansi" \
+	ip="ip -color=auto"
+
+# These common commands are just too long! Abbreviate them.
+alias \
+	ka="killall" \
+	g="git" \
+	trem="transmission-remote" \
+	YT="youtube-viewer" \
+	sdn="shutdown -h now" \
+	e="$EDITOR" \
+	v="$EDITOR" \
+	p="pacman" \
+	xi="sudo xbps-install" \
+	xr="sudo xbps-remove -R" \
+	xq="xbps-query" \
+	z="zathura"
+
+alias \
+	web="cd /var/www/html" \
+	lf="lfub" \
+	magit="nvim -c MagitOnly"
+
+alias emacs='~/.config/emacs/bin/doom run'
+alias torstart="~/.local/bin/torstart.sh"
+alias torstop="~/.local/bin/torstop.sh"
+alias torstatus="~/.local/bin/torstatus.sh"
+alias scriptsdir="cd ~/.local/bin"
+alias scriptshidden="cd ~/.local/share/"
+alias monero="monero-wallet-cli --proxy 127.0.0.1:9050 --daemon-address=127.0.0.1:18089"alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+alias reloadqtile="qtile cmd-obj -o cmd -f reload_config"
