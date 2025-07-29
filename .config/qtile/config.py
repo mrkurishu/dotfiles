@@ -8,13 +8,17 @@ from libqtile.lazy import lazy
 # Make sure 'qtile-extras' is installed or this config will not work.
 from qtile_extras import widget
 from qtile_extras.widget.decorations import BorderDecoration
-#from qtile_extras.widget import StatusNotifier
+from qtile_extras.widget import StatusNotifier
+from qtile_extras.widget import CheckUpdates
+from libqtile.widget import NvidiaSensors
+from qtile_extras.widget import Mpris2
 import colors
+import itertools
 
-mod = "mod4"              # Sets mod key to SUPER/WINDOWS
-myTerm = "alacritty"      # My terminal of choice
-myBrowser = "firefox"       # My browser of choice
-myEmacs = "emacsclient -c -a 'emacs' " # The space at the end is IMPORTANT!
+mod = "mod4"
+myTerm = "alacritty"
+myBrowser = "firefox"
+doomemacs = "emacsclient -c -a 'emacs' "
 
 
 # Allows you to input a name when adding treetab section.
@@ -39,31 +43,38 @@ def maximize_by_switching_layout(qtile):
     elif current_layout_name == 'max':
         qtile.current_group.layout = 'monadtall'
 
+
 keys = [
-    # The essentials
     Key([mod], "Return", lazy.spawn(myTerm), desc="Terminal"),
-    Key([mod, "shift"], "Return", lazy.spawn("rofi -show drun"), desc="  Launcher"),
     Key([mod], "b", lazy.spawn(myBrowser), desc='Web browser'),
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
     Key([mod],  "q", lazy.window.kill(), desc="Kill focused window"),
     Key([mod, "shift"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
 
-    # Dunst notifications setup
-    Key([mod], "F12", lazy.spawn("dunstctl history-pop"), desc='Dunt history popup'),
-    # Playerctl play-pause
-    Key([mod], "F8", lazy.spawn("playerctl play-pause"), desc="Play/Pause media"),
-    # Lock screen ilock3
-    Key([mod], "F10", lazy.spawn("i3lock-fancy"), desc="Lock session"),
+    # Dmenu
+    Key([ "mod4", "shift" ], "Return", lazy.spawn("bash -c '~/.local/bin/dmenu_run_i.sh'"), desc="Dmenu Run"),
+    Key([mod], "a", lazy.spawn("bash -c '~/.local/bin/dmenu_audio_switch.sh'"), desc="Switch Audio output"),
+    Key([mod], "p", lazy.spawn("bash -c '~/.local/bin/dmenu_pass.sh'"), desc="Launches passmenu+otp and clipboard pass"),
+    Key([mod], "F8", lazy.spawn("bash -c '~/.local/bin/toogle_music_play_stop.sh'"), desc="Play/Stop music"),
+    Key([ "mod4", "shift" ], "n", lazy.spawn("bash -c '~/.local/bin/dmenu_notes.sh'"), desc="Dmenu QuickNote"),
+
+    # Function keys
+    Key([mod], "F9", lazy.spawn("slock"), desc="Lock session"),
+    Key([mod], "F10", lazy.spawn("amixer sset Master toggle"), desc="Toggle mute/unmute vol"),
+    Key([mod], "F11", lazy.spawn("amixer sset Master 5%-"), desc="Decrease volume"),
+    Key([mod], "F12", lazy.spawn("amixer sset Master 5%+"), desc="Increse volume"),
+    Key([mod], "F1", lazy.spawn('amixer sset "Capture Switch" toggle'), desc="Toggle mute mic/unmute"),
+
     # Switch between windows
-    # Some layouts like 'monadtall' only need to use j/k to move
-    # through the stack, but other layouts like 'columns' will
-    # require all four directions h/j/k/l to move around.
     Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
     Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
     Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
     Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
     Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window"),
+
+    # Search word dictionary
+    Key([mod], "d", lazy.spawn("/home/kurishu/.local/bin/defineword.sh"), desc='Search word on dictionary online'),
 
     # Move windows between left/right columns or move up/down in current stack.
     # Moving out of range in Columns layout will create new column.
@@ -124,18 +135,56 @@ keys = [
     Key([mod, "shift"], "m", minimize_all(), desc="Toggle hide/show all windows on current group"),
 
     # Switch focus of monitors
-    Key([mod], "period", lazy.next_screen(), desc='Move focus to next monitor'),
-    Key([mod], "comma", lazy.prev_screen(), desc='Move focus to prev monitor'),
+    #Key([mod], "period", lazy.next_screen(), desc='Move focus to next monitor'),
+    #Key([mod], "comma", lazy.prev_screen(), desc='Move focus to prev monitor'),
 
+    #Apps
+    Key([mod], "s", lazy.spawn("signal-desktop"), desc="Launch or focus Signal Desktop"),
     #LF explorer
     Key([mod], 'masculine', lazy.spawn("alacritty -e /home/kurishu/.local/bin/lfub")),
+
 ]
+
+# Media animation icons for audio output playing
+media_icons = itertools.cycle([
+    "⠋", "⠙", "⠹", "⠸",
+    "⠼", "⠴", "⠦", "⠧",
+    "⠇", "⠏"
+
+    ])
+
+
+def get_animated_media():
+    try:
+        players = subprocess.run(
+            ["playerctl", "-l"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            timeout=0.5,
+        ).stdout.decode().splitlines()
+
+        for player in players:
+            title = subprocess.run(
+                ["playerctl", "--player=" + player, "metadata", "--format", "{{title}} - {{artist}}"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                timeout=0.5,
+            ).stdout.decode().strip()
+
+            if title:
+                icon = next(media_icons)
+                return f"{icon} {title}"
+    except Exception:
+        pass
+    return "⏸ Not Playing"
+
+
 groups = []
-group_names = ["1", "2", "3", "4", "5", "6", "7", "8", "9",]
+group_names = ["1", "2", "9", "0",]
 
-group_labels = ["1", "2", "3", "4", "5", "6", "7", "8", "9",]
+group_labels = ["1", "2", "9", "0",]
 
-group_layouts = ["monadtall", "monadtall", "tile", "tile", "monadtall", "monadtall", "monadtall", "monadtall", "monadtall"]
+group_layouts = ["monadtall", "monadtall", "tile", "tile"]
 
 for i in range(len(group_names)):
     groups.append(
@@ -167,8 +216,8 @@ for i in groups:
 
 colors = colors.GruvboxDark
 
-layout_theme = {"border_width": 2,
-                "margin": 8,
+layout_theme = {"border_width": 4,
+                "margin": 10,
                 "border_focus": colors[8],
                 "border_normal": colors[0]
                 }
@@ -188,8 +237,8 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font="Ubuntu Bold",
-    fontsize = 12,
+    font="Fira Code Bold",  # Updated to Fira Code Bold
+    fontsize = 22,
     padding = 0,
     background=colors[0]
 )
@@ -199,12 +248,12 @@ extension_defaults = widget_defaults.copy()
 def init_widgets_list():
     widgets_list = [
        widget.Prompt(
-                 font = "Ubuntu Mono",
-                 fontsize=14,
+                 font = "Fira Code",  # Updated to Fira Code
+                 fontsize=22,
                  foreground = colors[1]
         ),
         widget.GroupBox(
-                 fontsize = 11,
+                 fontsize = 22,
                  margin_y = 5,
                  margin_x = 5,
                  padding_y = 0,
@@ -214,7 +263,7 @@ def init_widgets_list():
                  inactive = colors[1],
                  rounded = False,
                  highlight_color = colors[2],
-                 highlight_method = "line",
+                 highlight_method = "block",
                  this_current_screen_border = colors[7],
                  this_screen_border = colors [4],
                  other_current_screen_border = colors[7],
@@ -222,35 +271,61 @@ def init_widgets_list():
                  ),
         widget.TextBox(
                  text = '|',
-                 font = "Ubuntu Mono",
+                 font = "Fira Code",  # Updated to Fira Code
                  foreground = colors[1],
                  padding = 2,
-                 fontsize = 14
+                 fontsize = 18
                  ),
         widget.CurrentLayoutIcon(
                  # custom_icon_paths = [os.path.expanduser("~/.config/qtile/icons")],
                  foreground = colors[1],
                  padding = 4,
-                 scale = 0.6
+                 scale = 0.9
                  ),
-        widget.CurrentLayout(
-                 foreground = colors[1],
-                 padding = 5
-                 ),
-        widget.TextBox(
+
+       widget.TextBox(
                  text = '|',
-                 font = "Ubuntu Mono",
+                 font = "Fira Code",  # Updated to Fira Code
                  foreground = colors[1],
                  padding = 2,
-                 fontsize = 14
+                 fontsize = 18
                  ),
         widget.WindowName(
                  foreground = colors[6],
                  max_chars = 40
                  ),
         widget.Spacer(length = 8),
+
+        widget.GenPollText(
+                update_interval=0.5,  # Faster = smoother animation
+                font="Fira Code",
+                fontsize=20,
+                foreground=colors[6],
+                func=get_animated_media,
+                ),
+
+        widget.Spacer(length = 10),
+
+        widget.GenPollText(
+                foreground = colors[1],
+                update_interval=1800,  # updates every 30 minutes
+                func=lambda: subprocess.check_output(
+                ["curl", "-s", "wttr.in/andorra?format=%c+%t+%h+%p+%w+%m"]
+                ).decode("utf-8").strip(),
+                name="weather",
+                fmt="|{} |",
+                decorations=[
+                     BorderDecoration(
+                         colour = colors[8],
+                         border_width = [0, 0, 0, 0],
+                     )
+                 ],
+                ),
+
+        widget.Spacer(length = 10),
+
         widget.CPU(
-                 format = 'CPU: {load_percent}%',
+                format = 'CPU:{load_percent}%',
                  foreground = colors[1],
                  decorations=[
                      BorderDecoration(
@@ -259,12 +334,13 @@ def init_widgets_list():
                      )
                  ],
                  ),
-        widget.Spacer(length = 8),
+        widget.Spacer(length = 10),
         widget.Memory(
                  foreground = colors[1],
                  mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(myTerm + ' -e btop')},
-                 format = '{MemUsed: .0f}{mm}',
-                 fmt = 'RAM: {} used',
+                 format = '{MemUsed:.0f}{mm}',
+                 measure_mem='G',
+                 fmt = 'RAM:{}',
                  decorations=[
                      BorderDecoration(
                          colour = colors[8],
@@ -272,16 +348,16 @@ def init_widgets_list():
                      )
                  ],
                  ),
-        widget.Spacer(length = 8),
+        widget.Spacer(length = 10),
         widget.DF(
                  update_interval = 60,
                  foreground = colors[1],
                  mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(myTerm + ' -e df')},
                  partition = '/',
-                 format = '{uf}{m} free({r:.0f}%)',
+                 format = '{uf}{m}({r:.0f}%)',
                  #format = '{uf}{m} free',
                  #format = '{r:.0f}% {uf}/{total} ({uf}/{total})',
-                 fmt = 'Disk: {}',
+                 fmt = 'SSD:{}',
                  visible_on_warn = False,
                  decorations=[
                      BorderDecoration(
@@ -291,22 +367,79 @@ def init_widgets_list():
                  ],
                  ),
         widget.Spacer(length = 8),
-        widget.Volume(
+        widget.DF(
+                 update_interval = 60,
                  foreground = colors[1],
-                 fmt = '🕫  Vol: {}',
+                 mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(myTerm + ' -e df')},
+                 partition = '/home',
+                 format = '{uf}{m}({r:.0f}%)',
+                 #format = '{uf}{m} free',
+                 #format = '{r:.0f}% {uf}/{total} ({uf}/{total})',
+                 fmt = 'NVME:{}',
+                 visible_on_warn = False,
                  decorations=[
                      BorderDecoration(
-                         colour = colors[7],
+                         colour = colors[5],
                          border_width = [0, 0, 0, 0],
                      )
                  ],
                  ),
+       widget.Spacer(length = 10),
+
+NvidiaSensors(
+        format='GPU:{temp}°C |',
+        foreground = colors[1],
+        update_interval=2,
+        foreground_alert='ff0000',
+        decorations=[
+                BorderDecoration(
+                colour = colors[5],
+                border_width = [0, 0, 0, 0],
+                )
+        ],
+        func=lambda: 'ff0000' if int(subprocess.check_output(["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"]).strip()) >= 80 else colors[1]
+
+        ),
+
+       widget.Spacer(length = 14),
+
+
+widget.Volume(
+                foreground = colors[1],
+                fmt='{}',
+                emoji=True,
+                emoji_list=['🔇', '🔈', '🔉', '🔊'],
+                theme_path='/usr/share/icons/Papirus-Dark/',
+                 decorations=[
+                     BorderDecoration(
+                         colour = colors[5],
+                         border_width = [0, 0, 0, 0],
+                     )
+                 ],
+                 ),
+
+widget.Volume(
+                 foreground = colors[1],
+                 fmt='{}',
+                 decorations=[
+                     BorderDecoration(
+                         colour = colors[5],
+                         border_width = [0, 0, 0, 0],
+                     )
+                 ],
+                 ),
+
+
+widget.Spacer(length = 3),
         widget.Clock(
                  foreground = colors[6],
                  format = "  %a, %d %b - %H:%M:%S",
                  ),
         widget.Spacer(length = 8),
-        widget.Systray(padding = 3),
+        widget.Systray(
+                padding = 9,
+                icon_size=31
+                ),
         widget.Spacer(length = 8),
 
         ]
@@ -326,9 +459,9 @@ def init_widgets_screen2():
 # For ex: Screen(top=bar.Bar(widgets=init_widgets_screen2(), background="#00000000", size=24)),
 
 def init_screens():
-    return [Screen(top=bar.Bar(widgets=init_widgets_screen1(), size=26)),
-            Screen(top=bar.Bar(widgets=init_widgets_screen2(), size=26)),
-            Screen(top=bar.Bar(widgets=init_widgets_screen2(), size=26))]
+    return [Screen(top=bar.Bar(widgets=init_widgets_screen1(), size=32)),
+            Screen(top=bar.Bar(widgets=init_widgets_screen2(), size=32)),
+            Screen(top=bar.Bar(widgets=init_widgets_screen2(), size=32))]
 
 if __name__ in ["config", "__main__"]:
     screens = init_screens()
@@ -339,7 +472,7 @@ if __name__ in ["config", "__main__"]:
 def window_to_prev_group(qtile):
     if qtile.currentWindow is not None:
         i = qtile.groups.index(qtile.currentGroup)
-        qtile.currentWindow.togroup(qtile.groups[i - 1].name)
+        qtile.windows_map[qtile.currentWindow.window].group = qtile.groups[i-1]
 
 def window_to_next_group(qtile):
     if qtile.currentWindow is not None:
@@ -424,6 +557,8 @@ wmname = "LG3D"
 # Open mpv in fullscreen mode
 @hook.subscribe.startup
 def startup():
-    for window in qtile.windows:
+   for window in qtile.windows_map.values():
         if window.window.get_wm_class() == ('mpv', 'mpv'):
             window.fullscreen = True
+
+# END
