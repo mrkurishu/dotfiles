@@ -3,7 +3,8 @@
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
 
-
+;; Set custom logo splash screen
+;; (setq fancy-splash-image "~/.config/doom/logo.txt")
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
 (setq user-full-name "mrkurishu"
@@ -21,7 +22,10 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-;;(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
+(setq doom-font (font-spec :family "Fira Code" :size 9.00 ))
+;;(when (display-graphic-p)
+;;  (set-face-attribute 'default nil :height 200)) ;; 200 = 20pt, or try 220, 240
+
 ;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
@@ -73,7 +77,6 @@
          :unnarrowed t)))
 
 (use-package org-roam
-  :ensure t
   :custom
   (org-roam-directory (file-truename "~/dox/roam/"))
   :bind (("C-c n l" . org-roam-buffer-toggle)
@@ -100,7 +103,6 @@
         org-roam-ui-open-on-start t))
 
 (use-package vterm
-  :ensure t
   :commands vterm)
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
@@ -317,8 +319,8 @@
 (my/org-setup-notifications)
 
 ;; Set Flyspell to use English by default
-(add-hook 'flyspell-mode-hook
-          (lambda () (ispell-change-dictionary "en")))
+;;(add-hook 'flyspell-mode-hook
+;;          (lambda () (ispell-change-dictionary "en")))
 
 ;; PDF TOOLS
 (after! pdf-tools
@@ -345,3 +347,11 @@
 ;; Make inactive frames more transparent (optional)
 (add-hook 'focus-out-hook (lambda () (my/set-inactive-frame-alpha '(85 . 85))))
 (add-hook 'focus-in-hook (lambda () (my/set-inactive-frame-alpha '(95 . 95))))
+
+;; GPG Integration
+(use-package! epa
+  :ensure nil  ; epa comes built-in with Emacs, no need to install separately
+  :config
+  (setq epa-file-encrypt-to '("E2D24AD48F4361E9"))  ; Set your primary key recipient here
+  (setq epa-file-select-keys 'silent)  ; Don't prompt for key selection
+  (setq epa-file-cache-passphrase-for-sessions t))  ; Cache passphrase in current Emacs session
