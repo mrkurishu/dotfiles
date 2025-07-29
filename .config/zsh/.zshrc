@@ -1,3 +1,4 @@
+
 # Kurishu's config for zsh
 
 # Setting prompt colors for Gruvbox
@@ -26,6 +27,14 @@ SAVEHIST=10000000
 HISTFILE="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/history"
 setopt inc_append_history # Command appended to history file
 
+# Share history in real-time among all terminals
+setopt APPEND_HISTORY       # Append new commands to history file
+setopt SHARE_HISTORY        # Share history between sessions immediately
+setopt HIST_IGNORE_ALL_DUPS # Ignore duplicate commands
+setopt HIST_IGNORE_SPACE    # Ignore commands starting with space
+setopt INC_APPEND_HISTORY   # Append command to history immediately
+setopt HIST_EXPIRE_DUPS_FIRST # Remove duplicates when trimming history
+
 # Load aliases and shortcuts if existent.
 #[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutrc"
 #[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutenvrc":q ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutenvrc"
@@ -40,31 +49,37 @@ compinit
 _comp_options+=(globdots)		# Include hidden files.
 
 # vi mode
-bindkey -v
-export KEYTIMEOUT=1
+#bindkey -v
+#export KEYTIMEOUT=1
 
 # Use vim keys in tab complete menu:
-bindkey -M menuselect 'h' vi-backward-char
-bindkey -M menuselect 'k' vi-up-line-or-history
-bindkey -M menuselect 'l' vi-forward-char
-bindkey -M menuselect 'j' vi-down-line-or-history
-bindkey -v '^?' backward-delete-char
+#bindkey -M menuselect 'h' vi-backward-char
+#bindkey -M menuselect 'k' vi-up-line-or-history
+#bindkey -M menuselect 'l' vi-forward-char
+#bindkey -M menuselect 'j' vi-down-line-or-history
+#bindkey -v '^?' backward-delete-char
 
 # Change cursor shape for different vi modes.
-function zle-keymap-select () {
-    case $KEYMAP in
-        vicmd) echo -ne '\e[1 q';;      # block
-        viins|main) echo -ne '\e[5 q';; # beam
-    esac
-}
-zle -N zle-keymap-select
-zle-line-init() {
-    zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
-    echo -ne "\e[5 q"
-}
-zle -N zle-line-init
-echo -ne '\e[5 q' # Use beam shape cursor on startup.
-preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
+#function zle-keymap-select () {
+#    case $KEYMAP in
+#        vicmd) echo -ne '\e[1 q';;      # block
+#        viins|main) echo -ne '\e[5 q';; # beam
+#    esac
+#}
+#zle -N zle-keymap-select
+#zle-line-init() {
+#    zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
+#    echo -ne "\e[5 q"
+#}
+#zle -N zle-line-init
+#echo -ne '\e[5 q' # Use beam shape cursor on startup.
+#preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
+
+# Explicitly bind Ctrl+A to beginning-of-line
+bindkey "^A" beginning-of-line
+
+# Explicitly bind Ctrl+E to end-of-line
+bindkey "^E" end-of-line
 
 # Use lf to switch directories and bind it to ctrl-o
 lfcd () {
@@ -76,20 +91,40 @@ lfcd () {
         [ -d "$dir" ] && [ "$dir" != "$(pwd)" ] && cd "$dir"
     fi
 }
-bindkey -s '^o' '^ulfcd\n'
+#bindkey -s '^o' '^ulfcd\n'
 
-bindkey -s '^a' '^ubc -lq\n'
+#bindkey -s '^a' '^ubc -lq\n'
 
-bindkey -s '^f' '^ucd "$(dirname "$(fzf)")"\n'
+#bindkey -s '^f' '^ucd "$(dirname "$(fzf)")"\n'
 
-bindkey '^[[P' delete-char
+#bindkey '^[[P' delete-char
 
 # Edit line in vim with ctrl-e:
-autoload edit-command-line; zle -N edit-command-line
-bindkey '^e' edit-command-line
-bindkey -M vicmd '^[[P' vi-delete-char
-bindkey -M vicmd '^e' edit-command-line
-bindkey -M visual '^[[P' vi-delete
+#autoload edit-command-line; zle -N edit-command-line
+#bindkey '^e' edit-command-line
+#bindkey -M vicmd '^[[P' vi-delete-char
+#bindkey -M vicmd '^e' edit-command-line
+#bindkey -M visual '^[[P' vi-delete
 
 # Load syntax highlighting; should be last.
-source /usr/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh 2>/dev/null
+#source /usr/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh 2>/dev/null
+
+#Start ssh keychan no output display
+export DISPLAY=:0  # Assuming the default display, adjust if necessary
+dbus-update-activation-environment DISPLAY
+
+# Enable vsync for opengl
+#export vblank_mode=1
+
+# Disable GTK file picker - file explorer GUI
+export GTK_USE_PORTAL=0
+
+# Load variable for dictionaries Stardict
+export SDCV_PATH=~/.config/dictionaries
+
+# Configuring DPI for Qt5
+#export QT_AUTO_SCREEN_SCALE_FACTOR=1
+#export QT_ENABLE_HIGHDPI_SCALING=1
+
+# Add aggressive shader compiler for MESA
+export RADV_PERFTEST=aco
