@@ -23,3 +23,4 @@ map [fullscreen] J zoom out
 map [fullscreen] i recolor
 map [fullscreen] p print
 map [fullscreen] g goto top
+map v selection
