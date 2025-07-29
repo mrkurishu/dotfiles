@@ -26,13 +26,13 @@
     width = 300
 
     # The maximum height of a single notification, excluding the frame.
-    height = 400
+    height = (150, 300)
 
     # Position the notification in the top right corner
     origin = bottom-right
 
     # Offset from the origin
-    offset = 0x25
+    offset = (0, 25)
 
     # Scale factor. It is auto-detected if value is 0.
     scale = 0
@@ -80,7 +80,7 @@
     # The transparency of the window.  Range: [0; 100].
     # This option will only work if a compositing window manager is
     # present (e.g. xcompmgr, compiz, etc.). (X11 only)
-    transparency = 0
+    transparency = 20
 
     # Draw a line of "separator_height" pixel height between two
     # notifications.
@@ -139,7 +139,7 @@
 
     # The spacing between lines.  If the height is smaller than the
     # font height, it will get raised to the font height.
-    line_height = 0
+    line_height = 4
 
     # Possible values are:
     # full: Allow a small subset of html markup in notifications:
@@ -213,7 +213,7 @@
     enable_recursive_icon_lookup = true
 
     # Set icon theme (only used for recursive icon lookup)
-    icon_theme = Papirus
+    icon_theme = Papirus-Dark
     # You can also set multiple icon themes, with the leftmost one being used first.
 
     # Align icons left/right/top/off
@@ -229,7 +229,7 @@
 
     # Paths to default icons (only necessary when not using recursive icon lookup)
    # icon_path = /usr/share/icons/gnome/16x16/status/:/usr/share/icons/gnome/16x16/devices/
-     icon_path= /usr/share/icons/Papirus
+     icon_path= /usr/share/icons/Papirus-Dark
     ### History ###
 
     # Should a notification popped up from history be sticky or timeout
@@ -317,6 +317,8 @@
     mouse_middle_click = do_action, close_current
     mouse_right_click = close_all
 
+#Added by me
+    word_wrap = yes
 # Experimental features that may or may not work correctly. Do not expect them
 # to have a consistent behaviour across releases.
 [experimental]
