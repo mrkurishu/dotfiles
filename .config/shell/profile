@@ -63,7 +63,23 @@ export _JAVA_AWT_WM_NONREPARENTING=1      # Fix for Java applications in dwm
 # Start graphical server on user's current tty if not already running.
 #[ "$(tty)" = "/dev/tty1" ] && ! pidof -s Xorg >/dev/null 2>&1 && exec startx "$XINITRC"
 
+#[ "$(tty)" = "/dev/tty1" ] && [ -z "$DISPLAY" ] && exec startx "$XINITRC"
+
+
 # Switch escape and caps if tty and no passwd required:
 #sudo -n loadkeys "$XDG_DATA_HOME/larbs/ttymaps.kmap" 2>/dev/null
 export DOOMDIR="$HOME/.config/doom"
 export PATH="$HOME/.config/emacs/bin:$PATH"
+
+# Set SSH_AUTH_SOCK to the keyring's SSH agent
+if [ -n "$SSH_AUTH_SOCK" ] && [ ! -S "$SSH_AUTH_SOCK" ]; then
+    export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/keyring/ssh"
+fi
+
+# Start graphical desktop
+if [ "$(tty)" = "/dev/tty1" ] && [ -z "$DISPLAY" ]; then
+  exec startx
+fi
+
+#EXPORT GPG on terminal
+export GPG_TTY=$(tty)

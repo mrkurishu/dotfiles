@@ -6,7 +6,6 @@
 # Use $XINITRC variable if file exists.
 [ -f "$XINITRC" ] && alias startx="startx $XINITRC"
 
-[ -f "$MBSYNCRC" ] && alias mbsync="mbsync -c $MBSYNCRC"
 
 # Always run with sudo privilegies
 for command in mount umount sv pacman updatedb su shutdown poweroff reboot ; do
@@ -34,7 +33,7 @@ alias \
 	home="cd ~" \
 	rmd="/bin/rm --recursive --force --verbose" \
 	la="ls -Alh" \
-	ll="ls -Fls"  \
+	ll="ls -Flsr"  \
 	topcpu="/bin/ps -eo pcpu,pid,user,args | sort -k 1 -r | head -10" \
 	emacs="emacsclient -c -a 'emacs'" \
 	wwoz="mpv --osd-level=3 http://wwoz-sc.streamguys1.com/wwoz-hi.mp3 &" \
@@ -79,3 +78,15 @@ alias scriptshidden="cd ~/.local/share/"
 alias monero="monero-wallet-cli --proxy 127.0.0.1:9050 --daemon-address=127.0.0.1:18089"
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias reloadqtile="qtile cmd-obj -o cmd -f reload_config"
+alias startserver="~/.local/bin/httpserverstart.sh"
+alias stopserver="~/.local/bin/httpserverstop.sh"
+
+# Docker alias
+alias ollama="~/.local/bin/run_docker_ollama.sh"
+alias deepseek="docker exec -it ollama ollama run deepseek-r1"
+alias dolphin="docker exec -it ollama ollama run dolphin3"
+alias removepacman="sudo pacman -Rns"
+alias updatepacman="sudo pacman -Syu"
+alias spotifydl="python3 ~/.local/bin/spotify-playlist-sync.py"
+alias qlogout='qtile cmd-obj -o cmd -f shutdown'
+alias gpglong='gpg --list-secret-keys --keyid-format LONG'
